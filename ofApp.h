@@ -2,7 +2,8 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
-#include "ofxTextBox.h"
+#include "ofxNetwork.h"
+// #include "ofxUIUtils.h"
 #include "Card.h"
 
 
@@ -38,6 +39,7 @@ public:
     ofTrueTypeFont restrictedFont;
     ofTrueTypeFont timerFont;
     ofxTextField textField;
+    //ofxTextInputField tField;
     ofSoundPlayer errorSound;
     
     float time;

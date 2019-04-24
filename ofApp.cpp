@@ -48,7 +48,6 @@ void ofApp::checkInput() {
         errorSound.play();
         current_card++;
         showCard();
-
     } else {
         for (int i = 0; i < cards[current_card].getRestrictedWords().size(); i++) {
             if (input.find(cards[current_card].getRestrictedWords()[i])
@@ -65,6 +64,8 @@ void ofApp::checkInput() {
 //--------------------------------------------------------------
 void ofApp::setup() {
     cards = createCards("/Users/tejukandula/Documents/FinalProject/TabooCards.txt");
+    std::random_shuffle(cards.begin(), cards.end());
+
     time = 60000;
     
     // Load fonts
@@ -76,6 +77,10 @@ void ofApp::setup() {
     gui.setup();
     gui.add(textField.setup("", ""));
     textField.setShape(500, 100, 150, 150);
+    
+    //tField.setup();
+    //tField.setBounds(500, 500, 30, 30);
+    //tField.setMultiline(true);
     
     // Setup Soounds
     errorSound.load("142608__autistic-lucario__error.wav");
@@ -94,18 +99,16 @@ void ofApp::update(){
 void ofApp::draw() {
     // Creates the Actual Taboo Card
     ofSetColor(ofColor::purple);
-    ofFill();
     ofDrawRectangle(75, 100, 325, 100);
     ofSetColor(ofColor::white);
     ofDrawRectangle(75, 200, 325, 330);
     showCard();
     
     // Create a Timer
-    float timer = (time - ofGetElapsedTimeMillis())/ 1000;
-    //ofDrawBitmapString(timer, 200, 50);
+    int timer = (time - ofGetElapsedTimeMillis())/ 1000;
+    wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
     
-    wordFont.drawString(to_string(timer),200,200);
-    //timerFont.drawString(timer, 200, 50);
+    //tField.draw();
     
     checkInput();
     
@@ -118,9 +121,7 @@ void ofApp::keyPressed(int key){
     if (key == ' ') {
         current_card++;
         showCard();
-    } else {
-        checkInput();
-    }
+    } 
 }
 
 //--------------------------------------------------------------
