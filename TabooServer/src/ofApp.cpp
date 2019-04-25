@@ -1,8 +1,8 @@
 #include "ofApp.h"
 
-vector<Card> cards;
+std::vector<Card> cards;
 int current_card = 0;
-vector<Player> players;
+std::vector<Player> players;
 int current_player = 0;
 
 vector<Card> createCards(string file_path) {
@@ -11,7 +11,7 @@ vector<Card> createCards(string file_path) {
     string current_word;
     // Goes through file line by line
     while (getline(fin, current_word)) {
-        // Create card object and set word to the first word
+        // Create card object and set word to the first  word
         Card c;
         c.setWord(current_word);
         vector<string> restricted;
@@ -31,16 +31,18 @@ vector<Card> createCards(string file_path) {
 void ofApp::createNewRound() {
     for (int i = 0; i < TCP.getLastID(); i++) {
         if (i == current_player) {
-            TCP.send(i, "DESCRIBE");
-            TCP.send(i, cards[current_card].getWord());
-            for (int j = 0; j < cards[current_card].getRestrictedWords().size(); j++) {
-                TCP.send(i, cards[current_card].getRestrictedWords()[j]);
-            }
-            TCP.send(i,"END");
-            
+            TCP.send(i, "STATE:DESCRIBE");
+            sendCard(i);
         } else {
-            TCP.send(i, "GUESS");
+            TCP.send(i, "STATE:GUESS");
         }
+    }
+}
+
+void ofApp::sendCard(int currPlayer) {
+    TCP.send(currPlayer, "WORD:" + cards[current_card].getWord());
+    for (int j = 0; j < cards[current_card].getRestrictedWords().size(); j++) {
+        TCP.send(currPlayer, "RESTRICTED:" + cards[current_card].getRestrictedWords()[j]);
     }
 }
 
@@ -52,15 +54,22 @@ void ofApp::setup(){
     TCP.setMessageDelimiter("\n");
     
     //Create cards
-    cards = createCards("/Users/tejukandula/Desktop/of_v0.10.1_osx_release/apps/myApps/TabooServer/TabooCards.txt");
+    cards = createCards("/Users/tejukandula/Documents/TabooServer/TabooCards.txt");
+    
+    // Create vector of players from connected clients
 }
-
 //--------------------------------------------------------------
 void ofApp::update() {
-
-    // Create vector of players from connected clients
+    
+    // Adds players to players vector once connected
     for (int i = 0; i <TCP.getLastID(); i++) {
-        if (!TCP.isClientConnected(i)) {
+        bool alreadyPlaying = false;
+        for (int j = 0; j < players.size(); j++) {
+            if (players[j].getClientId() == i) {
+                alreadyPlaying = true;
+            }
+        }
+        if (!TCP.isClientConnected(i) || alreadyPlaying) {
             continue;
         }
         Player p;
@@ -70,9 +79,20 @@ void ofApp::update() {
     }
     
     // Create new round at start of game and at the end of each round
-    //if (TCP.receive(current_player) == "NEW ROUND") {
+    string action = TCP.receive(current_player);
+    std::cout << action;
+    
+    if (action.compare("NEW ROUND") == 0) {
+        std::cout << "recieved";
         createNewRound();
-    //}
+    }
+    if (action.compare("NEW CARD") == 0) {
+        current_card++;
+        sendCard(current_player);
+    } else {
+        description = action;
+        std::cout << description;
+    }
 }
 
 //--------------------------------------------------------------

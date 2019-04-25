@@ -3,9 +3,14 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxNetwork.h"
-// #include "ofxUIUtils.h"
+#include "textInput.h"
 
-class ofApp : public ofBaseApp{
+class ofApp : public ofBaseApp {
+    string current_state;
+    string current_word;
+    vector<string> restricted;
+    float time_sixty;
+    float time_five;
     
 public:
     void setup();
@@ -27,6 +32,7 @@ public:
     void showCard();
     void checkInput();
     void startButtonPressed();
+    void takeString(string &str);
     
     ofxPanel gui;
     
@@ -38,6 +44,5 @@ public:
     //ofxTextInputField tField;
     ofSoundPlayer errorSound;
     ofxTCPClient tcpClient;
-    
-    float time;
+    textInput textBox;
 };

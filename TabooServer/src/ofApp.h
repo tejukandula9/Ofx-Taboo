@@ -11,6 +11,8 @@ extern vector<Player> players;
 extern int current_player;
 
 class ofApp : public ofBaseApp {
+    
+    string description;
 
 	public:
 		void setup();
@@ -30,6 +32,7 @@ class ofApp : public ofBaseApp {
 		void gotMessage(ofMessage msg);
     
         void createNewRound();
+        void sendCard(int currPlayer);
 		
     ofxTCPServer TCP;
 };
