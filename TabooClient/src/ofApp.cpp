@@ -19,7 +19,7 @@ void ofApp::showCard() {
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-    
+    gui.setup();
     gui.add(textField.setup("", ""));
     textField.setShape(500, 100, 150, 150);
     
@@ -36,17 +36,12 @@ void ofApp::setup() {
     time_sixty = 60000;
     time_five = 5000;
     current_state = "SETUP";
+    usedRestricted = false;
     
     // Load fonts
     wordFont.load("Roboto-Light.ttf", 20);
     restrictedFont.load("Roboto-Light.ttf", 15);
     timerFont.load("NewsCycle-Regular.ttf", 20);
-    
-    // Setup Textbox if the state is describe
-    if (tcpClient.receive() == "DESCRIBE") {
-    gui.add(textField.setup("", ""));
-    textField.setShape(500, 100, 150, 150);
-    }
     
     //tField.setup();
     //tField.setBounds(500, 500, 30, 30);
@@ -55,26 +50,25 @@ void ofApp::setup() {
     // Setup Sounds
     errorSound.load("142608__autistic-lucario__error.wav");
     
-    textBox.init();
-    ofAddListener(textBox.evtEnter, this, &ofApp::takeString);
-    gui.setup();
+    //textBox.init();
+    //ofAddListener(textBox.evtEnter, this, &ofApp::takeString);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     string action = tcpClient.receive();
-    std::cout <<action.substr(0,10);
+    std::cout <<action;
     // Checks for the board state(whether to guess or describe)
     if (action.substr(0,6).compare("STATE:") == 0) {
         current_state = action.substr(6, action.length());
-    }
-    // Gets the word sent from client
-    if (action.substr(0,5).compare("WORD:") == 0) {
+    } else if (action.substr(0,5).compare("WORD:") == 0) {
         current_word = action.substr(5, action.length());
-    }
-    // Add restricted words to vector
-    if (action.substr(0,11).compare("RESTRICTED:") == 0) {
+    } else if (action.substr(0,11).compare("RESTRICTED:") == 0) {
         restricted.push_back(action.substr(11, action.length()));
+    }else if (action.compare("INVALID MOVE") == 0) {
+        errorSound.play();
+    } else {
+        description = action;
     }
     
     tcpClient.send(textField.input);
@@ -82,23 +76,27 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+    gui.draw();
     if (current_state.compare("DESCRIBE") == 0) {
-    // Creates the Actual Taboo Card
-    ofSetColor(ofColor::purple);
-    ofDrawRectangle(75, 100, 325, 100);
-    ofSetColor(ofColor::white);
-    ofDrawRectangle(75, 200, 325, 330);
+        // Creates the Actual Taboo Card
+        ofSetColor(ofColor::purple);
+        ofDrawRectangle(75, 100, 325, 100);
+        ofSetColor(ofColor::white);
+        ofDrawRectangle(75, 200, 325, 330);
         
-    // Creates the words sent from the Client
-    showCard();
+        // Creates the words sent from the Client
+        showCard();
         
-    // Create a Timer
-    int timer = (time_sixty - ofGetElapsedTimeMillis())/ 1000;
-    wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
+        // Create a Timer
+        int timer = (time_sixty - ofGetElapsedTimeMillis())/ 1000;
+        wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
+        
+        // Send description to server
+        tcpClient.send(textField.input);
     } else if (current_state.compare("GUESS") == 0) {
-        
+        tcpClient.send(textField.input);
+        wordFont.drawString(description, 100,100);
     }
-    textBox.draw();
     
 }
 
@@ -106,7 +104,7 @@ void ofApp::draw() {
 void ofApp::keyPressed(int key) {
     if (key == 's') {
         errorSound.play();
-        tcpClient.send("NEW ROUND\n");
+        tcpClient.send("NEW ROUND");
     }
     if (key == ' ') {
         restricted.clear();
@@ -171,6 +169,7 @@ void ofApp::startButtonPressed() {
 
 void ofApp::takeString(string &str) {
 }
+
 
 
 

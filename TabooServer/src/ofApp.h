@@ -33,6 +33,8 @@ class ofApp : public ofBaseApp {
     
         void createNewRound();
         void sendCard(int currPlayer);
+        string toUpper(string str);
+        void checkDescription(string str);
 		
     ofxTCPServer TCP;
 };

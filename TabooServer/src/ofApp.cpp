@@ -46,6 +46,26 @@ void ofApp::sendCard(int currPlayer) {
     }
 }
 
+string ofApp::toUpper(string str) {
+    if (str.empty() || !TCP.isClientConnected(current_player)) {
+        return;
+    }
+    for (int i = 0; i < str.length(); i++) {
+        toupper(str[i]);
+    }
+}
+
+void ofApp::checkDescription(string str) {
+    //str = toUpper(str);
+    for (int i = 0; i < cards[current_card].getRestrictedWords().size(); i++) {
+        if (str.find(cards[current_card].getRestrictedWords().size()) != std::string::npos) {
+            current_card++;
+            TCP.send(current_player, "INVALID MOVE");
+            sendCard(current_player);
+        }
+    }
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     // Set up network
@@ -85,72 +105,91 @@ void ofApp::update() {
     if (action.compare("NEW ROUND") == 0) {
         std::cout << "recieved";
         createNewRound();
-    }
-    if (action.compare("NEW CARD") == 0) {
+    } else if (action.compare("NEW CARD") == 0) {
         current_card++;
         sendCard(current_player);
     } else {
         description = action;
         std::cout << description;
+        checkDescription(description);
+        // Sends description out to all the guessers
+        for (int i = 0; i < TCP.getLastID(); i++) {
+            if (i == current_player) {
+                continue;
+            }
+            TCP.send(i, description);
+        }
     }
+    
+    string guess;
+    for (int i = 0; i < TCP.getLastID(); i++) {
+        if (i == current_player) {
+            continue;
+        }
+        if (TCP.receive(i).compare(cards[current_card].getWord()) == 0) {
+            players[i].addPoints(2);
+            players[current_player].addPoints(1);
+        }
+    }
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseEntered(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseExited(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg){
-
+    
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
+void ofApp::dragEvent(ofDragInfo dragInfo){
+    
 }

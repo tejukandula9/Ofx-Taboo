@@ -3,7 +3,6 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxNetwork.h"
-#include "textInput.h"
 
 class ofApp : public ofBaseApp {
     string current_state;
@@ -11,6 +10,8 @@ class ofApp : public ofBaseApp {
     vector<string> restricted;
     float time_sixty;
     float time_five;
+    string description;
+    bool usedRestricted;
     
 public:
     void setup();
@@ -44,5 +45,4 @@ public:
     //ofxTextInputField tField;
     ofSoundPlayer errorSound;
     ofxTCPClient tcpClient;
-    textInput textBox;
 };
