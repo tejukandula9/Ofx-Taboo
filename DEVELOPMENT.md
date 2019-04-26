@@ -15,6 +15,10 @@
     * Try to use ofxUIUtils to create textbook, but had many errors
     * Try to use simpleTextBuffer addon to create textbox, but textbox took over whole screen, and text went on top of taboo card
     * Resort to using textField already in open frameworks
+* Design guessing part of the game
+    * Send description from describing player to guessing player and display it on screen
+    * Send guesses to the client to check if they are the right word
+    * Still have to figure out how to run two instances of the client to test the whole game
 * Issues
     * There appears to be a lag sending things to the client, so the restricted words don't match the actual words
     * Timer uses getElapsedTime but it does not create an accurate timer
