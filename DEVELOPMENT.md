@@ -5,6 +5,7 @@
 * Create a timer
     * Couldn't figure out how to create a timer, tried to find an addon.
     * Use getElapsedTime to create my own timer
+
 **Week 2**
 * Implement ofxNetworks into project
     * Split into two projects. Client and server and add those files to github
@@ -15,5 +16,5 @@
     * Try to use simpleTextBuffer addon to create textbox, but textbox took over whole screen, and text went on top of taboo card
     * Resort to using textField already in open frameworks
 * Issues
-    * Word and restricted word variables are initialized in client, but do not show up on screen
+    * There appears to be a lag sending things to the client, so the restricted words don't match the actual words
     * Timer uses getElapsedTime but it does not create an accurate timer
