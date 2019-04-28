@@ -32,7 +32,7 @@ class ofApp : public ofBaseApp {
 		void gotMessage(ofMessage msg);
     
         void createNewRound();
-        void sendCard(int currPlayer);
+        void sendCard();
         string toUpper(string str);
         void checkDescription(string str);
 		

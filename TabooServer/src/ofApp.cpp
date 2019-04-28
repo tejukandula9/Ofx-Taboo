@@ -32,18 +32,19 @@ void ofApp::createNewRound() {
     for (int i = 0; i < TCP.getLastID(); i++) {
         if (i == current_player) {
             TCP.send(i, "STATE:DESCRIBE");
-            sendCard(i);
         } else {
             TCP.send(i, "STATE:GUESS");
         }
     }
 }
 
-void ofApp::sendCard(int currPlayer) {
-    TCP.send(currPlayer, "WORD:" + cards[current_card].getWord());
+void ofApp::sendCard() {
+    string card = "WORD:" + cards[current_card].getWord();
     for (int j = 0; j < cards[current_card].getRestrictedWords().size(); j++) {
-        TCP.send(currPlayer, "RESTRICTED:" + cards[current_card].getRestrictedWords()[j]);
+        card += "RESTRICTED:" + cards[current_card].getRestrictedWords()[j];
     }
+    card += "RESTRICTED:";
+    TCP.send(current_player, card);
 }
 
 string ofApp::toUpper(string str) {
@@ -61,7 +62,7 @@ void ofApp::checkDescription(string str) {
         if (str.find(cards[current_card].getRestrictedWords().size()) != std::string::npos) {
             current_card++;
             TCP.send(current_player, "INVALID MOVE");
-            sendCard(current_player);
+            sendCard();
         }
     }
 }
@@ -75,8 +76,6 @@ void ofApp::setup(){
     
     //Create cards
     cards = createCards("/Users/tejukandula/Documents/TabooServer/TabooCards.txt");
-    
-    // Create vector of players from connected clients
 }
 //--------------------------------------------------------------
 void ofApp::update() {
@@ -103,11 +102,13 @@ void ofApp::update() {
     std::cout << action;
     
     if (action.compare("NEW ROUND") == 0) {
-        std::cout << "recieved";
         createNewRound();
+        std::cout << "recieved";
+    } else if (action.compare("START ROUND") == 0){
+        sendCard();
     } else if (action.compare("NEW CARD") == 0) {
         current_card++;
-        sendCard(current_player);
+        sendCard();
     } else {
         description = action;
         std::cout << description;

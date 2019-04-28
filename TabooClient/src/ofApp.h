@@ -12,6 +12,10 @@ class ofApp : public ofBaseApp {
     float time_five;
     string description;
     bool usedRestricted;
+    bool started_round;
+    // These two variables are the length of the actual words "WORD:" AND "RESTRICTED:"
+    int word_length;
+    int restricted_length;
     
 public:
     void setup();
@@ -33,7 +37,7 @@ public:
     void showCard();
     void checkInput();
     void startButtonPressed();
-    void takeString(string &str);
+    void parseCard(string card);
     
     ofxPanel gui;
     

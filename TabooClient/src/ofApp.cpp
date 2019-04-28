@@ -17,6 +17,33 @@ void ofApp::showCard() {
     }
 }
 
+/**
+ * Client sends Card information in the format WORD:XYZRESTRICTED:XYZRESTRICTED:XYZRESTRICTED:, where XYZ is the words on the taboo card
+ * There are no spaces in between so it is easier to parse
+ **/
+void ofApp::parseCard(string Card) {
+    // Looks for the string RESTRICTED: throughout the Card sent by Server
+    std::string look_for = "RESTRICTED:";
+    
+    // Sets up the current word which is between the strings "WORD:" and "RESTRICTED:"
+    size_t find = Card.find(look_for);
+    current_word = Card.substr(word_length,(find - word_length));
+    std::cout << current_word << endl;
+    
+    // Finds restricted words that are in between two "RESTRICTED:" strings
+    Card = Card.substr(find);
+    size_t found = Card.find(look_for, 1);
+    // Loops until last "RESTRICTED:" is found
+    while (found != std::string::npos) {
+        std::string restricted_word = Card.substr(restricted_length, found - restricted_length);
+        std::cout << restricted_word << endl;
+        restricted.push_back(restricted_word);
+        // Restructures the string card to remove words already added to restricted vector
+        Card = Card.substr(found);
+        found = Card.find(look_for, 1);
+    }
+}
+
 //--------------------------------------------------------------
 void ofApp::setup() {
     gui.setup();
@@ -37,21 +64,19 @@ void ofApp::setup() {
     time_five = 5000;
     current_state = "SETUP";
     usedRestricted = false;
+    word_length = 5;
+    restricted_length = 11;
+    started_round = false;
     
     // Load fonts
     wordFont.load("Roboto-Light.ttf", 20);
     restrictedFont.load("Roboto-Light.ttf", 15);
     timerFont.load("NewsCycle-Regular.ttf", 20);
     
-    //tField.setup();
-    //tField.setBounds(500, 500, 30, 30);
-    //tField.setMultiline(true);
-    
     // Setup Sounds
     errorSound.load("142608__autistic-lucario__error.wav");
     
-    //textBox.init();
-    //ofAddListener(textBox.evtEnter, this, &ofApp::takeString);
+    tcpClient.send("NEW ROUND");
 }
 
 //--------------------------------------------------------------
@@ -62,10 +87,8 @@ void ofApp::update() {
     if (action.substr(0,6).compare("STATE:") == 0) {
         current_state = action.substr(6, action.length());
     } else if (action.substr(0,5).compare("WORD:") == 0) {
-        current_word = action.substr(5, action.length());
-    } else if (action.substr(0,11).compare("RESTRICTED:") == 0) {
-        restricted.push_back(action.substr(11, action.length()));
-    }else if (action.compare("INVALID MOVE") == 0) {
+        parseCard(action);
+    } else if (action.compare("INVALID MOVE") == 0) {
         errorSound.play();
     } else {
         description = action;
@@ -76,8 +99,11 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    gui.draw();
     if (current_state.compare("DESCRIBE") == 0) {
+        if (!started_round) {
+            wordFont.drawString("You are describing, press s to start the round", 300, 384);
+        } else {
+            gui.draw();
         // Creates the Actual Taboo Card
         ofSetColor(ofColor::purple);
         ofDrawRectangle(75, 100, 325, 100);
@@ -93,7 +119,8 @@ void ofApp::draw() {
         
         // Send description to server
         tcpClient.send(textField.input);
-    } else if (current_state.compare("GUESS") == 0) {
+    }
+    }else if (current_state.compare("GUESS") == 0) {
         tcpClient.send(textField.input);
         wordFont.drawString(description, 100,100);
     }
@@ -104,7 +131,8 @@ void ofApp::draw() {
 void ofApp::keyPressed(int key) {
     if (key == 's') {
         errorSound.play();
-        tcpClient.send("NEW ROUND");
+        tcpClient.send("START ROUND");
+        started_round = true;
     }
     if (key == ' ') {
         restricted.clear();
@@ -167,8 +195,6 @@ void ofApp::startButtonPressed() {
     wordFont.drawString("aldskjf", 500, 500);
 }
 
-void ofApp::takeString(string &str) {
-}
 
 
 
