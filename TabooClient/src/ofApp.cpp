@@ -44,6 +44,13 @@ void ofApp::parseCard(string Card) {
     }
 }
 
+string ofApp::toUpper(string str) {
+    for (int i = 0; i < str.length(); i++) {
+        toupper(str[i]);
+    }
+    return str;
+}
+
 //--------------------------------------------------------------
 void ofApp::setup() {
     gui.setup();
@@ -90,11 +97,13 @@ void ofApp::update() {
         parseCard(action);
     } else if (action.compare("INVALID MOVE") == 0) {
         errorSound.play();
-    } else {
+    } else if (current_state == "GUESS") {
         description = action;
     }
     
-    tcpClient.send(textField.input);
+    description = toUpper(textField.getParameter().toString());
+    tcpClient.send(description);
+    
 }
 
 //--------------------------------------------------------------

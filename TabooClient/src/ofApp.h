@@ -7,6 +7,7 @@
 class ofApp : public ofBaseApp {
     string current_state;
     string current_word;
+    string description;
     vector<string> restricted;
     float time_sixty;
     float time_five;
@@ -38,6 +39,7 @@ public:
     void checkInput();
     void startButtonPressed();
     void parseCard(string card);
+    string toUpper(string str);
     
     ofxPanel gui;
     
