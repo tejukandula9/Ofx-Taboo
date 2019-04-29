@@ -7,11 +7,11 @@
 class ofApp : public ofBaseApp {
     string current_state;
     string current_word;
+    string guess_description;
     string description;
     vector<string> restricted;
     float time_sixty;
     float time_five;
-    string description;
     bool usedRestricted;
     bool started_round;
     // These two variables are the length of the actual words "WORD:" AND "RESTRICTED:"

@@ -38,31 +38,26 @@ void ofApp::createNewRound() {
     }
 }
 
-void ofApp::sendCard() {
+string ofApp::createCardString() {
     string card = "WORD:" + cards[current_card].getWord();
     for (int j = 0; j < cards[current_card].getRestrictedWords().size(); j++) {
         card += "RESTRICTED:" + cards[current_card].getRestrictedWords()[j];
     }
     card += "RESTRICTED:";
-    TCP.send(current_player, card);
-}
-
-string ofApp::toUpper(string str) {
-    if (str.empty() || !TCP.isClientConnected(current_player)) {
-        return;
-    }
-    for (int i = 0; i < str.length(); i++) {
-        toupper(str[i]);
-    }
+    return card;
 }
 
 void ofApp::checkDescription(string str) {
-    //str = toUpper(str);
+    if (str.find(cards[current_card].getWord()) != std::string::npos) {
+        current_card++;
+        TCP.send(current_player, "INVALID MOVE" + createCardString());
+    }
     for (int i = 0; i < cards[current_card].getRestrictedWords().size(); i++) {
-        if (str.find(cards[current_card].getRestrictedWords().size()) != std::string::npos) {
+        string r = cards[current_card].getRestrictedWords()[i];
+        if (str.find(r) != std::string::npos) {
             current_card++;
-            TCP.send(current_player, "INVALID MOVE");
-            sendCard();
+            TCP.send(current_player, "INVALID MOVE" + createCardString());
+            //sendCard();
         }
     }
 }
@@ -105,10 +100,10 @@ void ofApp::update() {
         createNewRound();
         std::cout << "recieved";
     } else if (action.compare("START ROUND") == 0){
-        sendCard();
+        TCP.send(current_player, createCardString());
     } else if (action.compare("NEW CARD") == 0) {
         current_card++;
-        sendCard();
+        TCP.send(current_player, createCardString());
     } else {
         description = action;
         std::cout << description;

@@ -92,13 +92,15 @@ void ofApp::update() {
     std::cout <<action;
     // Checks for the board state(whether to guess or describe)
     if (action.substr(0,6).compare("STATE:") == 0) {
-        current_state = action.substr(6, action.length());
+        current_state = action.substr(6);
     } else if (action.substr(0,5).compare("WORD:") == 0) {
         parseCard(action);
-    } else if (action.compare("INVALID MOVE") == 0) {
+    } else if (action.substr(0,12).compare("INVALID MOVE") == 0) {
         errorSound.play();
+        restricted.clear();
+        parseCard(action.substr(12));
     } else if (current_state == "GUESS") {
-        description = action;
+        guess_description = action;
     }
     
     description = toUpper(textField.getParameter().toString());
