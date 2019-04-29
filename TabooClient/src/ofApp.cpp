@@ -22,6 +22,7 @@ void ofApp::showCard() {
  * There are no spaces in between so it is easier to parse
  **/
 void ofApp::parseCard(string Card) {
+    restricted.clear();
     // Looks for the string RESTRICTED: throughout the Card sent by Server
     std::string look_for = "RESTRICTED:";
     
@@ -74,6 +75,7 @@ void ofApp::setup() {
     word_length = 5;
     restricted_length = 11;
     started_round = false;
+    points = "0";
     
     // Load fonts
     wordFont.load("Roboto-Light.ttf", 20);
@@ -83,7 +85,7 @@ void ofApp::setup() {
     // Setup Sounds
     errorSound.load("142608__autistic-lucario__error.wav");
     
-    tcpClient.send("NEW ROUND");
+    tcpClient.send("START GAME");
 }
 
 //--------------------------------------------------------------
@@ -97,8 +99,9 @@ void ofApp::update() {
         parseCard(action);
     } else if (action.substr(0,12).compare("INVALID MOVE") == 0) {
         errorSound.play();
-        restricted.clear();
         parseCard(action.substr(12));
+    } else if (action.substr(0,6).compare("SCORE:") == 0) {
+        points = action.substr(6);
     } else if (current_state == "GUESS") {
         guess_description = action;
     }
@@ -110,8 +113,12 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+    // Create a timer
+    int timer = (time_sixty - ofGetElapsedTimeMillis())/ 1000;
+    
     if (current_state.compare("DESCRIBE") == 0) {
         if (!started_round) {
+            wordFont.drawString("You have " + points + " points", 300, 250);
             wordFont.drawString("You are describing, press s to start the round", 300, 384);
         } else {
             gui.draw();
@@ -124,14 +131,18 @@ void ofApp::draw() {
         // Creates the words sent from the Client
         showCard();
         
-        // Create a Timer
-        int timer = (time_sixty - ofGetElapsedTimeMillis())/ 1000;
+        // Show Timer
         wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
         
         // Send description to server
         tcpClient.send(textField.input);
-    }
-    }else if (current_state.compare("GUESS") == 0) {
+            
+            if (timer == 0) {
+                tcpClient.send("END ROUND");
+                started_round = false;
+            }
+        }
+    } else if (current_state.compare("GUESS") == 0) {
         tcpClient.send(textField.input);
         wordFont.drawString(description, 100,100);
     }
@@ -141,12 +152,11 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
     if (key == 's') {
-        errorSound.play();
         tcpClient.send("START ROUND");
         started_round = true;
+        ofResetElapsedTimeCounter();
     }
     if (key == ' ') {
-        restricted.clear();
         tcpClient.send("NEW CARD");
     }
 }
@@ -199,11 +209,6 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){
     
-}
-
-void ofApp::startButtonPressed() {
-    tcpClient.send("NEW ROUND");
-    wordFont.drawString("aldskjf", 500, 500);
 }
 
 

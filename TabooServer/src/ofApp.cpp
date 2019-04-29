@@ -62,6 +62,15 @@ void ofApp::checkDescription(string str) {
     }
 }
 
+void ofApp::incrementPlayer() {
+    // Checks to see if the current player is the last player in the vector
+    if (current_player == (players.size() - 1)) {
+        current_player = 0;
+    } else {
+        current_player++;
+    }
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     // Set up network
@@ -92,18 +101,21 @@ void ofApp::update() {
         players.push_back(p);
     }
     
-    // Create new round at start of game and at the end of each round
     string action = TCP.receive(current_player);
     std::cout << action;
-    
-    if (action.compare("NEW ROUND") == 0) {
+    if (action.compare("START GAME") == 0) {
         createNewRound();
-        std::cout << "recieved";
     } else if (action.compare("START ROUND") == 0){
         TCP.send(current_player, createCardString());
     } else if (action.compare("NEW CARD") == 0) {
         current_card++;
         TCP.send(current_player, createCardString());
+    } else if (action.compare("END ROUND") == 0) {
+        for (int i = 0; i < players.size(); i ++) {
+            TCP.send(i, "SCORE:" + to_string(players[i].getScore()));
+        }
+        incrementPlayer();
+        createNewRound();
     } else {
         description = action;
         std::cout << description;

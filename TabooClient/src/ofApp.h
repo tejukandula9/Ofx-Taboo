@@ -14,6 +14,7 @@ class ofApp : public ofBaseApp {
     float time_five;
     bool usedRestricted;
     bool started_round;
+    string points;
     // These two variables are the length of the actual words "WORD:" AND "RESTRICTED:"
     int word_length;
     int restricted_length;
