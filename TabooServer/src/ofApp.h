@@ -31,6 +31,7 @@ class ofApp : public ofBaseApp {
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
         void incrementPlayer();
+        void sendToGuessers(string message);
     
         void createNewRound();
         string createCardString();

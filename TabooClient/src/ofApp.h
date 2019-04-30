@@ -9,6 +9,7 @@ class ofApp : public ofBaseApp {
     string current_word;
     string guess_description;
     string description;
+    string guess;
     vector<string> restricted;
     float time_sixty;
     float time_five;
@@ -44,6 +45,7 @@ public:
     
     ofxPanel gui;
     
+    ofTrueTypeFont displayFont;
     ofTrueTypeFont wordFont;
     ofTrueTypeFont restrictedFont;
     ofTrueTypeFont timerFont;
@@ -51,5 +53,7 @@ public:
     ofxButton startButton;
     //ofxTextInputField tField;
     ofSoundPlayer errorSound;
+    ofSoundPlayer timesUpSound;
+    ofSoundPlayer correctAnswerSound;
     ofxTCPClient tcpClient;
 };

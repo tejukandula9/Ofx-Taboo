@@ -71,6 +71,15 @@ void ofApp::incrementPlayer() {
     }
 }
 
+void ofApp::sendToGuessers(string message) {
+    for (int i = 0; i < players.size(); i++) {
+        if (i == current_player) {
+            continue;
+        }
+        TCP.send(i, message);
+    }
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     // Set up network
@@ -107,6 +116,7 @@ void ofApp::update() {
         createNewRound();
     } else if (action.compare("START ROUND") == 0){
         TCP.send(current_player, createCardString());
+        sendToGuessers("STARTED ROUND");
     } else if (action.compare("NEW CARD") == 0) {
         current_card++;
         TCP.send(current_player, createCardString());
@@ -121,26 +131,22 @@ void ofApp::update() {
         std::cout << description;
         checkDescription(description);
         // Sends description out to all the guessers
-        for (int i = 0; i < TCP.getLastID(); i++) {
-            if (i == current_player) {
-                continue;
-            }
-            TCP.send(i, description);
-        }
+        sendToGuessers(description);
     }
     
-    string guess;
     for (int i = 0; i < TCP.getLastID(); i++) {
         if (i == current_player) {
             continue;
         }
         if (TCP.receive(i).compare(cards[current_card].getWord()) == 0) {
+            TCP.send(i, "CORRECT ANSWER");
             players[i].addPoints(2);
             players[current_player].addPoints(1);
         }
     }
     
 }
+
 
 //--------------------------------------------------------------
 void ofApp::draw(){
