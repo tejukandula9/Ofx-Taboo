@@ -7,16 +7,16 @@
 class ofApp : public ofBaseApp {
     string current_state;
     string current_word;
-    string guess_description;
+    vector<string> restricted;
     string description;
     string guess;
-    vector<string> restricted;
-    float time_sixty;
-    float time_five;
-    bool usedRestricted;
+    string score;
+    float timer_length;
     bool started_round;
-    string points;
-    // These two variables are the length of the actual words "WORD:" AND "RESTRICTED:"
+    
+    /**
+     *These two variables are the length of the actual words "WORD:" AND "RESTRICTED:" used to parse the Card string recieved from server
+     **/
     int word_length;
     int restricted_length;
     
@@ -24,7 +24,6 @@ public:
     void setup();
     void update();
     void draw();
-    
     void skipButtonPressed();
     void keyPressed(int key);
     void keyReleased(int key);
@@ -37,23 +36,29 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
+    
+    // Helper Methods
     void showCard();
     void checkInput();
-    void startButtonPressed();
     void parseCard(string card);
     string toUpper(string str);
     
     ofxPanel gui;
     
+    // Font variables
     ofTrueTypeFont displayFont;
     ofTrueTypeFont wordFont;
     ofTrueTypeFont restrictedFont;
     ofTrueTypeFont timerFont;
+    
+    // TextField
     ofxTextField textField;
-    ofxButton startButton;
-    //ofxTextInputField tField;
+    
+    // Sound variables
     ofSoundPlayer errorSound;
     ofSoundPlayer timesUpSound;
     ofSoundPlayer correctAnswerSound;
+    
+    // Network Variable
     ofxTCPClient tcpClient;
 };

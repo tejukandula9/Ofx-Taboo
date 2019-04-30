@@ -1,6 +1,4 @@
 #include "Card.h"
-
-Card::Card(std::string actual_word, std::vector<std::string> restricted): word(actual_word), restricted_words(restricted){}
 Card::Card(){}
 
 void Card::setWord(std::string current_word) {

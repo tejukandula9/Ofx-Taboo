@@ -7,7 +7,6 @@ class Card {
     
 public:
     Card();
-    Card(std::string actual_word, std::vector<std::string> restricted);
     
     void setWord(std::string current_word);
     void setRestrictedWords(std::vector<std::string> current_restricted);

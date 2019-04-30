@@ -1,6 +1,6 @@
 # **Project Idea**
-I'm planning on creating a digital version of the game taboo. This is a game where a player has to describe a word, without saying any of the restricted words and the other players have to guess. I want to give the option of playing as teams or individually. While playing, there will be a time for one minute and buttons for the player to press when they want to skip a certain word or another player has guessed the word they are trying to describe. At the end of each round, there will an option to end the game or keep playing. The game will automatically end when all the cards have been used. Add sound and animation at the end of each round. Create 3d graph of each players stats at the end of the game.
+I'm planning on creating a digital version of the game taboo using networks. This is a game where a player has to describe a word, without saying any of the restricted words and the other players have to guess. One player will be selected to describe and the other players will guess. The describing player can enter clues in a textfield. If the player uses the actual word or a restricted word, the game will automatically move on to the next card. The guessing players can also enter text into a textfield. If they guess right they will earn 2 points and the player describing will earn 1 point. There will also be a timer displayed and when time is up, a new player will be describing.
 
 # **Libraries**
-* ofxChart- Open frameworks addon for creating 2d and 3d charts
+* ofxNetworks- Open frameworks addon for using TCP network
 * ofSoundPlayer - Open frameworks addon to load and play sounds

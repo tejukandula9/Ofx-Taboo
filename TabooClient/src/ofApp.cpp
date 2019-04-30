@@ -3,10 +3,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-    // Sets up windown
+    // Sets up textfield and background
     gui.setup();
     gui.add(textField.setup("", ""));
-    textField.setShape(500, 100, 150, 150);
+    textField.setShape(500, 100, 400, 75);
     ofSetBackgroundColor(ofColor::dimGrey);
     
     // Network settings setup
@@ -15,13 +15,11 @@ void ofApp::setup() {
     tcpClient.setMessageDelimiter("\n");
     
     // Setup variables
-    time_sixty = 60000;
-    time_five = 5000;
+    timer_length = 60000;
     word_length = 5;
     restricted_length = 11;
-    points = "0";
+    score = "0";
     current_state = "SETUP";
-    usedRestricted = false;
     started_round = false;
     
     // Load fonts
@@ -41,79 +39,88 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
     string action = tcpClient.receive();
-    std::cout <<action;
-    // Parses through the string sent by client
+
+    /**
+     * Parses through the string sent by client, certain key words will only be sent to either describer or guesser
+     * STATE and SCORE sent to all players
+     * WORD and INVALID MOVE sent to describer
+     * STARTED ROUND and CORRECT ANSWER sent to guesser
+     **/
     if (action.substr(0,6).compare("STATE:") == 0) {
         current_state = action.substr(6);
+    } else if (action.substr(0,6).compare("SCORE:") == 0) {
+        score = action.substr(6);
     } else if (action.substr(0,5).compare("WORD:") == 0) {
         parseCard(action);
     } else if (action.substr(0,12).compare("INVALID MOVE") == 0) {
         errorSound.play();
+        textField.input = "";
         parseCard(action.substr(12));
-    } else if (action.substr(0,6).compare("SCORE:") == 0) {
-        points = action.substr(6);
     } else if (action.compare("STARTED ROUND") == 0) {
         started_round = true;
     } else if (action.compare("CORRECT ANSWER") == 0) {
         correctAnswerSound.play();
     }
-    
-    // Sends contents of textField to Server, server can differentiate whether it came from guesser or describer
-    if (current_state == "GUESS") {
-        guess = toUpper(textField.getParameter().toString());
-        tcpClient.send(guess);
-        description = tcpClient.receive();
-    } else {
-        description = toUpper(textField.getParameter().toString());
-        tcpClient.send(description);
-    }
-    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    // Create a timer
-    int timer = (time_sixty - ofGetElapsedTimeMillis())/ 1000;
-    
-    if (current_state.compare("DESCRIBE") == 0) {
-        if (!started_round) {
-            ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("You have " + points + " points", 390, 330);
-            displayFont.drawString("You are describing, press s to start the round", 200, 384);
-        } else {
-            gui.draw();
-        // Creates the Actual Taboo Card
-        ofSetColor(ofColor::purple);
-        ofDrawRectangle(75, 100, 325, 100);
-        ofSetColor(ofColor::whiteSmoke);
-        ofDrawRectangle(75, 200, 325, 330);
+    // Create and display timer for both guesser and describer
+    int timer = (timer_length - ofGetElapsedTimeMillis())/ 1000;
+    if (started_round) {
+        wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
         
-        // Creates the words sent from the Client
-        showCard();
-        
-        // Send description to server
-        tcpClient.send(textField.input);
-            
-            if (timer == 0) {
-                timesUpSound.play();
-                tcpClient.send("END ROUND");
-                started_round = false;
-            }
-        }
-    } else if (current_state.compare("GUESS") == 0) {
-        if (!started_round) {
-            ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("You have " + points + " points", 300, 250);
-            displayFont.drawString("You are guessing, the round will start once the describer chooses to start the game", 300, 384);
-        } else {
-            gui.draw();
-            wordFont.drawString(description, 100,100);
+        // Ends the round when time is up
+        if (timer == 0) {
+            timesUpSound.play();
+            tcpClient.send("END ROUND");
+            started_round = false;
         }
     }
     
-    // Display Timer for both guesser and describer
-    if (started_round) {
-        wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
+    // Creates screen for describer
+    if (current_state.compare("DESCRIBE") == 0) {
+        // Shows score and says to press 's' to start the game
+        if (!started_round) {
+            ofSetColor(ofColor::darkSlateBlue);
+            displayFont.drawString("You have " + score + " points", 390, 330);
+            displayFont.drawString("You are describing, press 's' to start the round", 200, 384);
+        } else {
+            // Draw the textfield
+            gui.draw();
+            
+            // Creates the Actual Taboo Card
+            ofSetColor(ofColor::purple);
+            ofDrawRectangle(75, 100, 325, 100);
+            ofSetColor(ofColor::whiteSmoke);
+            ofDrawRectangle(75, 200, 325, 330);
+            showCard();
+            
+            // Shows directions
+            ofSetColor(ofColor::darkSlateBlue);
+            displayFont.drawString("Type your clue in the text field above", 500, 250);
+            displayFont.drawString("Press enter to send a clue", 500, 300);
+            displayFont.drawString("Press space to skip card", 500, 350);
+        
+            // Sends what user is typing to client
+            description = toUpper(textField.getParameter().toString());
+            tcpClient.send(description);
+        }
+    }
+    
+    // Creates screen for guesser
+    if (current_state.compare("GUESS") == 0) {
+        // Shows score and indicated player has to wait for describer to start the round
+        if (!started_round) {
+            ofSetColor(ofColor::darkSlateBlue);
+            displayFont.drawString("You have " + score + " points", 300, 250);
+            displayFont.drawString("You are guessing, the round will start once the describer chooses to start the game", 300, 384);
+        } else {
+            // Draw textField
+            gui.draw();
+            // Displays description sent from client
+            wordFont.drawString(description, 100,100);
+        }
     }
     
 }
@@ -130,11 +137,13 @@ void ofApp::keyPressed(int key) {
             tcpClient.send("NEW CARD");
         }
     }
-    if (current_state.compare("GUESS") == 0) {
+    /**
+     * Sends uppercase contents of textfield to server for both guesser and describer
+     **/
         if (key == '\r') {
-            tcpClient.send(textField.input);
+            guess = toUpper(textField.getParameter().toString());
+            tcpClient.send(guess);
         }
-    }
 }
 
 //--------------------------------------------------------------
@@ -223,6 +232,9 @@ void ofApp::parseCard(string Card) {
     }
 }
 
+/**
+ Used to change description and guess to upper case so the client can compare to the actual values which are already uppercase
+ **/
 string ofApp::toUpper(string str) {
     for (int i = 0; i < str.length(); i++) {
         str [i] = toupper(str[i]);

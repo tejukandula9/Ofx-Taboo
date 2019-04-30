@@ -5,80 +5,6 @@ int current_card = 0;
 std::vector<Player> players;
 int current_player = 0;
 
-vector<Card> createCards(string file_path) {
-    vector<Card> cards;
-    std::ifstream fin(file_path);
-    string current_word;
-    // Goes through file line by line
-    while (getline(fin, current_word)) {
-        // Create card object and set word to the first  word
-        Card c;
-        c.setWord(current_word);
-        vector<string> restricted;
-        // Create vector of restricted words until reaching an empty line
-        while (current_word != "") {
-            getline(fin,current_word);
-            restricted.push_back(current_word);
-        }
-        // Remove last vector because it is an empty line
-        restricted.pop_back();
-        c.setRestrictedWords(restricted);
-        cards.push_back(c);
-    }
-    return cards;
-}
-
-void ofApp::createNewRound() {
-    for (int i = 0; i < TCP.getLastID(); i++) {
-        if (i == current_player) {
-            TCP.send(i, "STATE:DESCRIBE");
-        } else {
-            TCP.send(i, "STATE:GUESS");
-        }
-    }
-}
-
-string ofApp::createCardString() {
-    string card = "WORD:" + cards[current_card].getWord();
-    for (int j = 0; j < cards[current_card].getRestrictedWords().size(); j++) {
-        card += "RESTRICTED:" + cards[current_card].getRestrictedWords()[j];
-    }
-    card += "RESTRICTED:";
-    return card;
-}
-
-void ofApp::checkDescription(string str) {
-    if (str.find(cards[current_card].getWord()) != std::string::npos) {
-        current_card++;
-        TCP.send(current_player, "INVALID MOVE" + createCardString());
-    }
-    for (int i = 0; i < cards[current_card].getRestrictedWords().size(); i++) {
-        string r = cards[current_card].getRestrictedWords()[i];
-        if (str.find(r) != std::string::npos) {
-            current_card++;
-            TCP.send(current_player, "INVALID MOVE" + createCardString());
-            //sendCard();
-        }
-    }
-}
-
-void ofApp::incrementPlayer() {
-    // Checks to see if the current player is the last player in the vector
-    if (current_player == (players.size() - 1)) {
-        current_player = 0;
-    } else {
-        current_player++;
-    }
-}
-
-void ofApp::sendToGuessers(string message) {
-    for (int i = 0; i < players.size(); i++) {
-        if (i == current_player) {
-            continue;
-        }
-        TCP.send(i, message);
-    }
-}
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -87,14 +13,15 @@ void ofApp::setup(){
     TCP.setup(settings);
     TCP.setMessageDelimiter("\n");
     
-    //Create cards
+    //Create and shuffle cards
     cards = createCards("/Users/tejukandula/Documents/TabooServer/TabooCards.txt");
+    std::random_shuffle(cards.begin(), cards.end());
 }
 //--------------------------------------------------------------
 void ofApp::update() {
-    
     // Adds players to players vector once connected
     for (int i = 0; i <TCP.getLastID(); i++) {
+        // Checks if player is already connected and added to player vector
         bool alreadyPlaying = false;
         for (int j = 0; j < players.size(); j++) {
             if (players[j].getClientId() == i) {
@@ -105,13 +32,12 @@ void ofApp::update() {
             continue;
         }
         Player p;
-        p.setId(TCP.receive(i));
         p.setClientId(i);
         players.push_back(p);
     }
     
+    // Parses through strings sent by current describer
     string action = TCP.receive(current_player);
-    std::cout << action;
     if (action.compare("START GAME") == 0) {
         createNewRound();
     } else if (action.compare("START ROUND") == 0){
@@ -121,6 +47,7 @@ void ofApp::update() {
         current_card++;
         TCP.send(current_player, createCardString());
     } else if (action.compare("END ROUND") == 0) {
+        // Sends the current score to all the players at the end of a round
         for (int i = 0; i < players.size(); i ++) {
             TCP.send(i, "SCORE:" + to_string(players[i].getScore()));
         }
@@ -134,6 +61,7 @@ void ofApp::update() {
         sendToGuessers(description);
     }
     
+    // Checks guesses from all the guessers
     for (int i = 0; i < TCP.getLastID(); i++) {
         if (i == current_player) {
             continue;
@@ -206,4 +134,86 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){
     
+}
+
+vector<Card> ofApp::createCards(string file_path) {
+    vector<Card> cards;
+    std::ifstream fin(file_path);
+    string current_word;
+    
+    // Goes through file line by line
+    while (getline(fin, current_word)) {
+        // Create card object and set word to the first  word
+        Card c;
+        c.setWord(current_word);
+        vector<string> restricted;
+        // Create vector of restricted words until reaching an empty line
+        while (current_word != "") {
+            getline(fin,current_word);
+            restricted.push_back(current_word);
+        }
+        // Remove last vector because it is an empty line
+        restricted.pop_back();
+        c.setRestrictedWords(restricted);
+        cards.push_back(c);
+    }
+    return cards;
+}
+
+void ofApp::createNewRound() {
+    for (int i = 0; i < TCP.getLastID(); i++) {
+        if (i == current_player) {
+            TCP.send(i, "STATE:DESCRIBE");
+        } else {
+            TCP.send(i, "STATE:GUESS");
+        }
+    }
+}
+
+string ofApp::createCardString() {
+    string card = "WORD:" + cards[current_card].getWord();
+    
+    // Adds all restricted words to the string
+    for (int j = 0; j < cards[current_card].getRestrictedWords().size(); j++) {
+        card += "RESTRICTED:" + cards[current_card].getRestrictedWords()[j];
+    }
+    
+    // End string with "RESTRICTED:" so it's easier to parse
+    card += "RESTRICTED:";
+    return card;
+}
+
+void ofApp::checkDescription(string str) {
+    // Checks whether player used the word in their description
+    if (str.find(cards[current_card].getWord()) != std::string::npos) {
+        current_card++;
+        TCP.send(current_player, "INVALID MOVE" + createCardString());
+    }
+    
+    // Checks whether player used a restricted word in their description
+    for (int i = 0; i < cards[current_card].getRestrictedWords().size(); i++) {
+        string r = cards[current_card].getRestrictedWords()[i];
+        if (str.find(r) != std::string::npos) {
+            current_card++;
+            TCP.send(current_player, "INVALID MOVE" + createCardString());
+        }
+    }
+}
+
+void ofApp::incrementPlayer() {
+    // Checks to see if the current player is the last player in the vector
+    if (current_player == (players.size() - 1)) {
+        current_player = 0;
+    } else {
+        current_player++;
+    }
+}
+
+void ofApp::sendToGuessers(string message) {
+    for (int i = 0; i < players.size(); i++) {
+        if (i == current_player) {
+            continue;
+        }
+        TCP.send(i, message);
+    }
 }

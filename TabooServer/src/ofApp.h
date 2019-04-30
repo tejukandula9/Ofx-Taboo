@@ -5,6 +5,7 @@
 #include "Card.h"
 #include "Player.h"
 
+
 extern vector<Card> cards;
 extern int current_card;
 extern vector<Player> players;
@@ -33,9 +34,10 @@ class ofApp : public ofBaseApp {
         void incrementPlayer();
         void sendToGuessers(string message);
     
+        // Helper Methods
+        vector<Card> createCards(string file_path);
         void createNewRound();
         string createCardString();
-        string toUpper(string str);
         void checkDescription(string str);
 		
     ofxTCPServer TCP;
