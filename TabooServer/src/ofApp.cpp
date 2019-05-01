@@ -41,21 +41,19 @@ void ofApp::update() {
     
     // Parses through strings sent by current describer
     string action = TCP.receive(current_player);
-    if (action.compare("START GAME") == 0) {
+    if (action == "START GAME") {
         createNewRound();
-    } else if (action.compare("START ROUND") == 0){
+    } else if (action == "START ROUND") {
         TCP.send(current_player, createCardString());
         sendToGuessers("STARTED ROUND");
-    } else if (action.compare("NEW CARD") == 0) {
+    } else if (action == "NEW CARD") {
         current_card++;
         TCP.send(current_player, createCardString());
-        sendToGuessers("ACTION:SKIPPED CARD");
-    } else if (action.compare("END ROUND") == 0) {
-        // Sends the current score to all the players at the end of a round
-        for (int i = 0; i < players.size(); i ++) {
-            TCP.send(i, "SCORE:" + to_string(players[i].getScore()));
-        }
-        current_player++;
+        sendToGuessers("ACTION:Skipped Card");
+    } else if (action == "END ROUND") {
+        //ofSetBackgroundColor(ofColor::red);
+        //current_player++;
+        incrementPlayer();
         createNewRound();
     } else {
         description = action;
@@ -82,7 +80,7 @@ void ofApp::draw() {
         ofDrawBitmapString(guess, 300, 300);
         if (guess.compare(cards[current_card].getWord()) == 0) {
             TCP.send(i, "CORRECT ANSWER");
-            sendToGuessers("ACTION:GUESSED THE WORD");
+            sendToGuessers("ACTION:Guessed Word");
             current_card++;
             TCP.send(current_player, "CORRECT ANSWER" + createCardString());
             players[i].addPoints(2);
@@ -93,6 +91,7 @@ void ofApp::draw() {
     }
     
     ofDrawBitmapString(to_string(players.size()), 500, 500);
+    ofDrawBitmapString(to_string(current_player), 550, 500);
     
 }
 
@@ -176,7 +175,7 @@ vector<Card> ofApp::createCards(string file_path) {
 }
 
 void ofApp::createNewRound() {
-    for (int i = 0; i < TCP.getLastID(); i++) {
+    for (int i = 0; i < players.size(); i++) {
         if (i == current_player) {
             TCP.send(i, "STATE:DESCRIBE");
         } else {
@@ -203,7 +202,7 @@ void ofApp::checkDescription(string str) {
     if (str.find(cards[current_card].getWord()) != std::string::npos) {
         current_card++;
         TCP.send(current_player, "INVALID MOVE" + createCardString());
-        sendToGuessers("ACTION:USED INVALID WORD");
+        sendToGuessers("ACTION:Used Invalid Word");
     }
     
     // Checks whether player used a restricted word in their description
@@ -212,7 +211,7 @@ void ofApp::checkDescription(string str) {
         if (str.find(r) != std::string::npos) {
             current_card++;
             TCP.send(current_player, "INVALID MOVE" + createCardString());
-            sendToGuessers("ACTION:USED INVALID WORD");
+            sendToGuessers("ACTION:Used Invalid Word");
         }
     }
 }
