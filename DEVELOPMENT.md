@@ -22,3 +22,12 @@
 * Issues
     * There appears to be a lag sending things to the client, so the restricted words don't match the actual words
     * Timer uses getElapsedTime but it does not create an accurate timer
+    
+    **Week 3**
+    * Fixed Issues from Week 2
+        * To fix the lag, I sent the actual word and the restricted words as one long string instead of sending the actual word and each restricted word seperately
+        * I used ofResetElapsedTimeCounter() to reset the time at the begenning of each round
+    * Create helper method to parse through a card string to determine actual and restricted words.
+    * Create a helper function that turns the description/guess from the textfield to uppercase before sending it to the sender. This helps make it easier to check against the actual words in the card class since they are all uppercase
+    * Create a boolean variable to check when a round is started
+    * Add sounds when a restricted word is used, time is up or someone guessed the correct word

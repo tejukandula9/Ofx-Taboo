@@ -8,9 +8,12 @@ class ofApp : public ofBaseApp {
     string current_state;
     string current_word;
     vector<string> restricted;
+    vector<string> clues;
     string description;
     string guess;
     string score;
+    string describer_move;
+    string last_description;
     float timer_length;
     bool started_round;
     
@@ -47,6 +50,7 @@ public:
     
     // Font variables
     ofTrueTypeFont displayFont;
+    ofTrueTypeFont displayFontSmall;
     ofTrueTypeFont wordFont;
     ofTrueTypeFont restrictedFont;
     ofTrueTypeFont timerFont;

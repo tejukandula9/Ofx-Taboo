@@ -20,6 +20,7 @@ void ofApp::setup() {
     restricted_length = 11;
     score = "0";
     current_state = "SETUP";
+    describer_move = "START GAME";
     started_round = false;
     
     // Load fonts
@@ -27,23 +28,23 @@ void ofApp::setup() {
     restrictedFont.load("Roboto-Light.ttf", 15);
     timerFont.load("NewsCycle-Regular.ttf", 20);
     displayFont.load("Boogaloo-Regular.ttf", 30);
+    displayFontSmall.load("Boogaloo-Regular.ttf", 15);
     
     // Setup Sounds
     errorSound.load("142608__autistic-lucario__error.wav");
     timesUpSound.load("244932__kwahmah-02__short-buzzer.wav");
     correctAnswerSound.load("264981__renatalmar__sfx-magic.wav");
-    
-    tcpClient.send("START GAME");
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     string action = tcpClient.receive();
-
+    std::cout << action;
+    wordFont.drawString(action, 200,200);
     /**
      * Parses through the string sent by client, certain key words will only be sent to either describer or guesser
-     * STATE and SCORE sent to all players
-     * WORD and INVALID MOVE sent to describer
+     * STATE, SCORE and INVALID MOVE sent to all players
+     * WORD sent to describer
      * STARTED ROUND and CORRECT ANSWER sent to guesser
      **/
     if (action.substr(0,6).compare("STATE:") == 0) {
@@ -58,13 +59,30 @@ void ofApp::update() {
         parseCard(action.substr(12));
     } else if (action.compare("STARTED ROUND") == 0) {
         started_round = true;
-    } else if (action.compare("CORRECT ANSWER") == 0) {
+        ofResetElapsedTimeCounter();
+    } else if (action.substr(0,14).compare("CORRECT ANSWER") == 0) {
         correctAnswerSound.play();
+        if (current_state == "DESCRIBE") {
+            parseCard(action.substr(14));
+        }
+    } else if (action.substr(0,6) == "ACTION") {
+        describer_move = action.substr(6);
+        clues.clear();
+    } else {
+        if (last_description != action && action != "") {
+            last_description = action;
+            clues.push_back(action);
+        }
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+    
+    if (current_state.compare("SETUP") == 0) {
+    // Display before the game starts
+    displayFont.drawString("Press space to start the game", 200, 384);
+    }
     // Create and display timer for both guesser and describer
     int timer = (timer_length - ofGetElapsedTimeMillis())/ 1000;
     if (started_round) {
@@ -98,7 +116,7 @@ void ofApp::draw() {
             
             // Shows directions
             ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("Type your clue in the text field above", 500, 250);
+            displayFont.drawString("Type your clue in the text field", 500, 250);
             displayFont.drawString("Press enter to send a clue", 500, 300);
             displayFont.drawString("Press space to skip card", 500, 350);
         
@@ -113,16 +131,24 @@ void ofApp::draw() {
         // Shows score and indicated player has to wait for describer to start the round
         if (!started_round) {
             ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("You have " + score + " points", 300, 250);
-            displayFont.drawString("You are guessing, the round will start once the describer chooses to start the game", 300, 384);
+            displayFont.drawString("You have " + score + " points", 390, 330);
+            displayFont.drawString("You are guessing, the round will start once the describer chooses to start the game", 20, 384);
         } else {
             // Draw textField
             gui.draw();
+            // Display Instructions
+            displayFontSmall.drawString("Enter your guess in the textfield, press enter to send", 500, 150);
+            displayFont.drawString("Last Move: " + describer_move, 500, 600);
             // Displays description sent from client
-            wordFont.drawString(description, 100,100);
+            displayFont.drawString("Description: ", 100, 150);
+            for (int i = 0; i < clues.size(); i++) {
+                displayFont.drawString(clues[i], 100, 200 + 50*i);
+            }
+            // Sends guesses to client
+            guess = toUpper(textField.getParameter().toString());
+            tcpClient.send(guess);
         }
     }
-    
 }
 
 void ofApp::keyPressed(int key) {
@@ -137,13 +163,11 @@ void ofApp::keyPressed(int key) {
             tcpClient.send("NEW CARD");
         }
     }
-    /**
-     * Sends uppercase contents of textfield to server for both guesser and describer
-     **/
-        if (key == '\r') {
-            guess = toUpper(textField.getParameter().toString());
-            tcpClient.send(guess);
+    if (current_state.compare("SETUP") == 0) {
+        if (key == ' ') {
+            tcpClient.send("START GAME");
         }
+    }
 }
 
 //--------------------------------------------------------------
