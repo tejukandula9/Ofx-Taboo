@@ -13,6 +13,7 @@ class ofApp : public ofBaseApp {
     string description;
     string guess;
     string score;
+    string rank;
     string describer_move;
     string last_description;
     string last_guess;

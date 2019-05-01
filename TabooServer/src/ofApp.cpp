@@ -51,10 +51,10 @@ void ofApp::update() {
     } else if (action == "END ROUND") {
         current_card++;
         incrementPlayer();
+        sendPlayerRanks();
         createNewRound();
     } else {
         description = action;
-        std::cout << description;
         // Sends description out to all the guessers
         sendToGuessers(description);
         checkDescription(description);
@@ -197,12 +197,14 @@ void ofApp::checkGuesses() {
         if (i == current_player) {
             continue;
         }
+        
         // Sends guesses to describer
         string guess = TCP.receive(i);
         if (guess == "END ROUND") {
             continue;
         }
         TCP.send(current_player, "GUESS:" + guess);
+        
         // Checks whether the guess is correct
         if (guess.find(cards[current_card].getWord()) != std::string::npos) {
             // Sent to Guessers
@@ -228,6 +230,15 @@ void ofApp::incrementPlayer() {
         current_player = 0;
     } else {
         current_player++;
+    }
+}
+
+void ofApp::sendPlayerRanks() {
+    vector<Player> ranked_players = players;
+    std::sort(ranked_players.begin(), ranked_players.end());
+    for (int i = 0; i < ranked_players.size(); i++) {
+        ofSetColor(ofColor::white);
+        TCP.send(ranked_players[i].getClientId(), "RANKING:" + to_string(players.size() - i));
     }
 }
 

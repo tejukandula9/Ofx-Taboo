@@ -40,6 +40,7 @@ class ofApp : public ofBaseApp {
         string createCardString();
         void checkDescription(string str);
         void checkGuesses();
+        void sendPlayerRanks();
 		
     ofxTCPServer TCP;
 };

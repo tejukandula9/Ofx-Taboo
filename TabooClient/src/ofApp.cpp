@@ -19,6 +19,7 @@ void ofApp::setup() {
     word_length = 5;
     restricted_length = 11;
     score = "0";
+    rank = "0";
     current_state = "SETUP";
     describer_move = "Start Game";
     started_round = false;
@@ -51,6 +52,8 @@ void ofApp::update() {
         current_state = action.substr(6);
     } else if (action.substr(0,6) == "SCORE:") {
         score = action.substr(6);
+    } else if (action.substr(0,8) == "RANKING:") {
+        rank = action.substr(8);
     } else if (action.substr(0,5) == "WORD:") {
         parseCard(action);
         guesses.clear();
@@ -90,7 +93,7 @@ void ofApp::update() {
 void ofApp::draw() {
     // Display before the game starts
     if (current_state == "SETUP") {
-        displayFont.drawString("Press space to start the game", 230, 384);
+        displayFont.drawString("Press space to start the game", 260, 384);
     }
     
     // Create and display timer and score for both describer and guesser after the game starts
@@ -111,7 +114,8 @@ void ofApp::draw() {
         // Shows score and says to press 's' to start the game
         if (!started_round) {
             ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("You have " + score + " points", 390, 330);
+            displayFont.drawString("You have " + score + " points", 390, 300);
+            displayFont.drawString("You currently rank: " + rank, 390, 345);
             displayFont.drawString("You are describing, press 's' to start the round", 200, 384);
         } else {
             // Draw the textfield
@@ -149,7 +153,8 @@ void ofApp::draw() {
         // Shows score and indicated player has to wait for describer to start the round
         if (!started_round) {
             ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("You have " + score + " points", 390, 330);
+            displayFont.drawString("You have " + score + " points", 390, 300);
+            displayFont.drawString("You currently rank: " + rank, 390, 345);
             displayFont.drawString("You are guessing", 390, 384);
         } else {
             // Draw textField
