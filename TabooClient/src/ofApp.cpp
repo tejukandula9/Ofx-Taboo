@@ -90,12 +90,12 @@ void ofApp::update() {
 void ofApp::draw() {
     // Display before the game starts
     if (current_state == "SETUP") {
-        displayFont.drawString("Press space to start the game", 200, 384);
+        displayFont.drawString("Press space to start the game", 230, 384);
     }
     
     // Create and display timer and score for both describer and guesser after the game starts
     if (started_round) {
-        // Display timer
+        // Display timer, divide by 1000 to get from milliseconds to seconds
         int timer = (timer_length - ofGetElapsedTimeMillis())/ 1000;
         wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
         displayFont.drawString("Score: " + score, 800, 650);
