@@ -15,14 +15,13 @@ void ofApp::setup() {
     tcpClient.setMessageDelimiter("\n");
     
     // Setup variables
-    timer_length = 10000;
+    timer_length = 60000;
     word_length = 5;
     restricted_length = 11;
     score = "0";
     current_state = "SETUP";
     describer_move = "Start Game";
     started_round = false;
-    end_round = false;
     
     // Load fonts
     wordFont.load("Roboto-Light.ttf", 20);
@@ -40,8 +39,6 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
     string action = tcpClient.receive();
-    std::cout << action;
-    wordFont.drawString(action, 200,200);
     /**
      * Parses through the string sent by client, certain key words will only be sent to either describer or guesser
      * STATE, SCORE and INVALID MOVE sent to all players
@@ -50,11 +47,13 @@ void ofApp::update() {
      **/
     if (action.substr(0,6) == "STATE:") {
         started_round = false;
+        textField.input = "";
         current_state = action.substr(6);
     } else if (action.substr(0,6) == "SCORE:") {
         score = action.substr(6);
     } else if (action.substr(0,5) == "WORD:") {
         parseCard(action);
+        guesses.clear();
     } else if (action.substr(0,12) == "INVALID MOVE") {
         errorSound.play();
         textField.input = "";
@@ -62,6 +61,7 @@ void ofApp::update() {
     } else if (action == "STARTED ROUND") {
         started_round = true;
         textField.input = "";
+        clues.clear();
         ofResetElapsedTimeCounter();
     } else if (action.substr(0,14) == "CORRECT ANSWER") {
         correctAnswerSound.play();
@@ -70,6 +70,7 @@ void ofApp::update() {
         }
     } else if (action.substr(0,7) == "ACTION:") {
         describer_move = action.substr(7);
+        textField.input = "";
         clues.clear();
     } else if (action.substr(0,6) == "GUESS:") {
         string curr_guess = action.substr(6);
@@ -87,25 +88,22 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    wordFont.drawString(to_string(started_round), 200, 600);
+    // Display before the game starts
     if (current_state == "SETUP") {
-        // Display before the game starts
         displayFont.drawString("Press space to start the game", 200, 384);
     }
     
-    // Create and display timer and score for both describer and guesser
+    // Create and display timer and score for both describer and guesser after the game starts
     if (started_round) {
+        // Display timer
         int timer = (timer_length - ofGetElapsedTimeMillis())/ 1000;
         wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
-        
+        displayFont.drawString("Score: " + score, 800, 650);
         // Ends the round when time is up
         if (timer == 0 && current_state == "DESCRIBE") {
             tcpClient.send("END ROUND");
             timesUpSound.play();
-            // started_round = false;
         }
-        
-        displayFont.drawString("Score: " + score, 800, 650);
     }
     
     // Creates screen for describer
@@ -156,14 +154,17 @@ void ofApp::draw() {
         } else {
             // Draw textField
             gui.draw();
+            
             // Display Instructions
             displayFontSmall.drawString("Enter your guess in the textfield, press enter to send", 500, 150);
             displayFont.drawString("Last Move: " + describer_move, 600, 600);
+            
             // Displays description sent from client
             displayFont.drawString("Description: ", 100, 150);
             for (int i = 0; i < clues.size(); i++) {
                 displayFont.drawString(clues[i], 100, 200 + 50*i);
             }
+            
             // Sends guesses to client
             guess = toUpper(textField.getParameter().toString());
             tcpClient.send(guess);

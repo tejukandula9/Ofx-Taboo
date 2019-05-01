@@ -18,7 +18,6 @@ class ofApp : public ofBaseApp {
     string last_guess;
     float timer_length;
     bool started_round;
-    bool end_round;
     
     /**
      *These two variables are the length of the actual words "WORD:" AND "RESTRICTED:" used to parse the Card string recieved from server
@@ -45,7 +44,6 @@ public:
     
     // Helper Methods
     void showCard();
-    void checkInput();
     void parseCard(string card);
     string toUpper(string str);
     

@@ -16,8 +16,6 @@ void ofApp::setup(){
     //Create and shuffle cards
     cards = createCards("/Users/tejukandula/Documents/TabooServer/TabooCards.txt");
     std::random_shuffle(cards.begin(), cards.end());
-    
-    ofSetBackgroundColor(ofColor::darkBlue);
 }
 //--------------------------------------------------------------
 void ofApp::update() {
@@ -51,8 +49,7 @@ void ofApp::update() {
         TCP.send(current_player, createCardString());
         sendToGuessers("ACTION:Skipped Card");
     } else if (action == "END ROUND") {
-        //ofSetBackgroundColor(ofColor::red);
-        //current_player++;
+        current_card++;
         incrementPlayer();
         createNewRound();
     } else {
@@ -63,36 +60,14 @@ void ofApp::update() {
         checkDescription(description);
     }
     
-    
+    // Checks guess
+    checkGuesses();
 }
 
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    // Checks guesses from all the guessers
-    for (int i = 0; i < players.size(); i++) {
-        string guess;
-        if (i == current_player) {
-            continue;
-        }
-        guess = TCP.receive(i);
-        TCP.send(current_player, "GUESS:" + guess);
-        ofDrawBitmapString(guess, 300, 300);
-        if (guess.compare(cards[current_card].getWord()) == 0) {
-            TCP.send(i, "CORRECT ANSWER");
-            sendToGuessers("ACTION:Guessed Word");
-            current_card++;
-            TCP.send(current_player, "CORRECT ANSWER" + createCardString());
-            players[i].addPoints(2);
-            players[current_player].addPoints(1);
-            TCP.send(i, "SCORE:" + to_string(players[i].getScore()));
-            TCP.send(current_player, "SCORE:" + to_string(players[current_player].getScore()));
-        }
-    }
-    
-    ofDrawBitmapString(to_string(players.size()), 500, 500);
-    ofDrawBitmapString(to_string(current_player), 550, 500);
-    
+
 }
 
 //--------------------------------------------------------------
@@ -212,6 +187,37 @@ void ofApp::checkDescription(string str) {
             current_card++;
             TCP.send(current_player, "INVALID MOVE" + createCardString());
             sendToGuessers("ACTION:Used Invalid Word");
+        }
+    }
+}
+
+void ofApp::checkGuesses() {
+    // Checks guesses from all the guessers
+    for (int i = 0; i < players.size(); i++) {
+        if (i == current_player) {
+            continue;
+        }
+        // Sends guesses to describer
+        string guess = TCP.receive(i);
+        if (guess == "END ROUND") {
+            continue;
+        }
+        TCP.send(current_player, "GUESS:" + guess);
+        // Checks whether the guess is correct
+        if (guess.find(cards[current_card].getWord()) != std::string::npos) {
+            // Sent to Guessers
+            TCP.send(i, "CORRECT ANSWER");
+            sendToGuessers("ACTION:Guessed Word");
+            
+            // Sent to Describer
+            current_card++;
+            TCP.send(current_player, "CORRECT ANSWER" + createCardString());
+            
+            // Add points and send score to respective players
+            players[i].addPoints(2);
+            players[current_player].addPoints(1);
+            TCP.send(i, "SCORE:" + to_string(players[i].getScore()));
+            TCP.send(current_player, "SCORE:" + to_string(players[current_player].getScore()));
         }
     }
 }

@@ -39,6 +39,7 @@ class ofApp : public ofBaseApp {
         void createNewRound();
         string createCardString();
         void checkDescription(string str);
+        void checkGuesses();
 		
     ofxTCPServer TCP;
 };
