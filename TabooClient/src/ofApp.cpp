@@ -65,9 +65,15 @@ void ofApp::update() {
         if (current_state == "DESCRIBE") {
             parseCard(action.substr(14));
         }
-    } else if (action.substr(0,6) == "ACTION") {
-        describer_move = action.substr(6);
+    } else if (action.substr(0,7) == "ACTION:") {
+        describer_move = action.substr(7);
         clues.clear();
+    } else if (action.substr(0,6) == "GUESS:") {
+        string curr_guess = action.substr(6);
+        if (last_guess != curr_guess && curr_guess != "") {
+            last_guess = curr_guess;
+            guesses.push_back(curr_guess);
+        }
     } else {
         if (last_description != action && action != "") {
             last_description = action;
@@ -116,9 +122,17 @@ void ofApp::draw() {
             
             // Shows directions
             ofSetColor(ofColor::darkSlateBlue);
-            displayFont.drawString("Type your clue in the text field", 500, 250);
-            displayFont.drawString("Press enter to send a clue", 500, 300);
-            displayFont.drawString("Press space to skip card", 500, 350);
+            displayFontSmall.drawString("Type your clue in the text field", 600, 125);
+            displayFontSmall.drawString("Press enter to send a clue", 600, 150);
+            displayFontSmall.drawString("Press space to skip card", 600, 175);
+            
+            // Shows guesses
+            ofSetColor(ofColor::black);
+            displayFont.drawString("Guesses:", 560, 215);
+            for (int i = 0; i < guesses.size(); i++) {
+                ofSetColor(ofColor::darkSlateBlue);
+                displayFontSmall.drawString(guesses[i], 550, 240 + i*20);
+            }
         
             // Sends what user is typing to client
             description = toUpper(textField.getParameter().toString());
@@ -234,6 +248,7 @@ void ofApp::showCard() {
  **/
 void ofApp::parseCard(string Card) {
     restricted.clear();
+    guesses.clear();
     // Looks for the string RESTRICTED: throughout the Card sent by Server
     std::string look_for = "RESTRICTED:";
     

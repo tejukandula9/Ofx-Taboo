@@ -49,7 +49,7 @@ void ofApp::update() {
     } else if (action.compare("NEW CARD") == 0) {
         current_card++;
         TCP.send(current_player, createCardString());
-        sendToGuessers("ACTION:PLAYER SKIPPED CARD");
+        sendToGuessers("ACTION:SKIPPED CARD");
     } else if (action.compare("END ROUND") == 0) {
         // Sends the current score to all the players at the end of a round
         for (int i = 0; i < players.size(); i ++) {
@@ -78,14 +78,17 @@ void ofApp::draw() {
             continue;
         }
         guess = TCP.receive(i);
+        TCP.send(current_player, "GUESS:" + guess);
         ofDrawBitmapString(guess, 300, 300);
         if (guess.compare(cards[current_card].getWord()) == 0) {
             TCP.send(i, "CORRECT ANSWER");
-            sendToGuessers("ACTION:A PLAYER GUESSED THE WORD");
+            sendToGuessers("ACTION:GUESSED THE WORD");
             current_card++;
             TCP.send(current_player, "CORRECT ANSWER" + createCardString());
             players[i].addPoints(2);
             players[current_player].addPoints(1);
+            TCP.send(i, "SCORE:" + to_string(players[i].getScore()));
+            TCP.send(current_player, "SCORE:" + to_string(players[current_player].getScore()));
         }
     }
     
@@ -200,7 +203,7 @@ void ofApp::checkDescription(string str) {
     if (str.find(cards[current_card].getWord()) != std::string::npos) {
         current_card++;
         TCP.send(current_player, "INVALID MOVE" + createCardString());
-        sendToGuessers("ACTION:PLAYER USED INVALID WORD");
+        sendToGuessers("ACTION:USED INVALID WORD");
     }
     
     // Checks whether player used a restricted word in their description
@@ -209,7 +212,7 @@ void ofApp::checkDescription(string str) {
         if (str.find(r) != std::string::npos) {
             current_card++;
             TCP.send(current_player, "INVALID MOVE" + createCardString());
-            sendToGuessers("ACTION:PLAYER USED INVALID WORD");
+            sendToGuessers("ACTION:USED INVALID WORD");
         }
     }
 }

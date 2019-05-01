@@ -9,11 +9,13 @@ class ofApp : public ofBaseApp {
     string current_word;
     vector<string> restricted;
     vector<string> clues;
+    vector<string> guesses;
     string description;
     string guess;
     string score;
     string describer_move;
     string last_description;
+    string last_guess;
     float timer_length;
     bool started_round;
     
