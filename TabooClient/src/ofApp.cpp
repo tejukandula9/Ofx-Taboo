@@ -59,6 +59,7 @@ void ofApp::update() {
         parseCard(action.substr(12));
     } else if (action.compare("STARTED ROUND") == 0) {
         started_round = true;
+        textField.input = "";
         ofResetElapsedTimeCounter();
     } else if (action.substr(0,14).compare("CORRECT ANSWER") == 0) {
         correctAnswerSound.play();
@@ -86,10 +87,11 @@ void ofApp::update() {
 void ofApp::draw() {
     
     if (current_state.compare("SETUP") == 0) {
-    // Display before the game starts
-    displayFont.drawString("Press space to start the game", 200, 384);
+        // Display before the game starts
+        displayFont.drawString("Press space to start the game", 200, 384);
     }
-    // Create and display timer for both guesser and describer
+    
+    // Create and display timer and score for both describer and guesser
     int timer = (timer_length - ofGetElapsedTimeMillis())/ 1000;
     if (started_round) {
         wordFont.drawString("Time Remaining: " + to_string(timer),100,75);
@@ -100,6 +102,8 @@ void ofApp::draw() {
             tcpClient.send("END ROUND");
             started_round = false;
         }
+        
+        displayFont.drawString("Score: " + score, 450, 650);
     }
     
     // Creates screen for describer
@@ -146,13 +150,13 @@ void ofApp::draw() {
         if (!started_round) {
             ofSetColor(ofColor::darkSlateBlue);
             displayFont.drawString("You have " + score + " points", 390, 330);
-            displayFont.drawString("You are guessing, the round will start once the describer chooses to start the game", 20, 384);
+            displayFont.drawString("You are guessing", 500, 384);
         } else {
             // Draw textField
             gui.draw();
             // Display Instructions
             displayFontSmall.drawString("Enter your guess in the textfield, press enter to send", 500, 150);
-            displayFont.drawString("Last Move: " + describer_move, 500, 600);
+            displayFont.drawString("Last Move: " + describer_move, 450, 600);
             // Displays description sent from client
             displayFont.drawString("Description: ", 100, 150);
             for (int i = 0; i < clues.size(); i++) {
@@ -170,6 +174,7 @@ void ofApp::keyPressed(int key) {
         if (key == 's') {
             tcpClient.send("START ROUND");
             started_round = true;
+            textField.input = "";
             ofResetElapsedTimeCounter();
         }
         if (key == ' ') {
