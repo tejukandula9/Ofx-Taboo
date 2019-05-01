@@ -16,4 +16,15 @@
     * Type guess into text field and press enter to guess
         * If correct a bell noise will sound and will move to next card
     * Two points for each accurately guessed card
-    
+
+**Build Instructions**
+* Make sure you have openframeworks installed
+* Clone this repository
+* Using the project generator, click on import
+    * There are two different projects, server and client. Make sure you import them seperately
+    * For client add ofxGui and ofxNetwork to the addons
+    * For server add ofxNetwork
+* Click on generate and open in IDE for both client and server. 
+* Run the server first
+* Through the terminal, go into TabooClient and then bin
+    * Run open -n TabooClientDebug.app multiple times depending on how many players you want
