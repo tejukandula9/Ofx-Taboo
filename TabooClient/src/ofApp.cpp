@@ -16,8 +16,6 @@ void ofApp::setup() {
     
     // Setup variables
     timer_length = 60000;
-    word_length = 5;
-    restricted_length = 11;
     score = "0";
     rank = "0";
     current_state = "SETUP";
@@ -135,10 +133,8 @@ void ofApp::draw() {
             displayFontSmall.drawString("Press space to skip card", 600, 175);
             
             // Shows guesses
-            ofSetColor(ofColor::black);
-            displayFont.drawString("Guesses:", 560, 215);
+            displayFont.drawString("Guesses:", 540, 215);
             for (int i = 0; i < guesses.size(); i++) {
-                ofSetColor(ofColor::darkSlateBlue);
                 displayFontSmall.drawString(guesses[i], 550, 240 + i*20);
             }
         
@@ -260,6 +256,12 @@ void ofApp::showCard() {
  * There are no spaces in between so it is easier to parse
  **/
 void ofApp::parseCard(string Card) {
+    /**
+     *These two variables are the length of the actual words "WORD:" AND "RESTRICTED:" used to parse the Card string recieved from server
+     **/
+    int word_length = 5;
+    int restricted_length = 11;
+    
     restricted.clear();
     guesses.clear();
     // Looks for the string RESTRICTED: throughout the Card sent by Server
@@ -268,7 +270,6 @@ void ofApp::parseCard(string Card) {
     // Sets up the current word which is between the strings "WORD:" and "RESTRICTED:"
     size_t find = Card.find(look_for);
     current_word = Card.substr(word_length,(find - word_length));
-    std::cout << current_word << endl;
     
     // Finds restricted words that are in between two "RESTRICTED:" strings
     Card = Card.substr(find);
@@ -276,7 +277,6 @@ void ofApp::parseCard(string Card) {
     // Loops until last "RESTRICTED:" is found
     while (found != std::string::npos) {
         std::string restricted_word = Card.substr(restricted_length, found - restricted_length);
-        std::cout << restricted_word << endl;
         restricted.push_back(restricted_word);
         // Restructures the string card to remove words already added to restricted vector
         Card = Card.substr(found);

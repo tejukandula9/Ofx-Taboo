@@ -26,5 +26,6 @@
     * For server add ofxNetwork
 * Click on generate and open in IDE for both client and server. 
 * Run the server first
+* Build TabooClient
 * Through the terminal, go into TabooClient and then bin
     * Run open -n TabooClientDebug.app multiple times depending on how many players you want

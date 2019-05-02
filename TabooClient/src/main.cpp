@@ -2,7 +2,7 @@
 #include "ofApp.h"
 
 //========================================================================
-
+/**
 int main( ) {
 	ofSetupOpenGL(1024,700,OF_WINDOW);			// <-------- setup the GL context
 
@@ -12,4 +12,4 @@ int main( ) {
 	ofRunApp(new ofApp());
 
 }
-
+**/

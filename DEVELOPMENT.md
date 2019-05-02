@@ -31,6 +31,7 @@
     * Create a helper function that turns the description/guess from the textfield to uppercase before sending it to the sender. This helps make it easier to check against the actual words in the card class since they are all uppercase
     * Create a boolean variable to check when a round is started
     * Add sounds when a restricted word is used, time is up or someone guessed the correct word
+    * Rank players in the client and send current rankings to servers to display before the start of each round
     * Issues and Fixes
         * Vector of clues was getting infinately long
             * Check to see if the clue had been used before or is empty before adding to the vector

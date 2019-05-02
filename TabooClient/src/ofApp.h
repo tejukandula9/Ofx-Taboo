@@ -20,12 +20,6 @@ class ofApp : public ofBaseApp {
     float timer_length;
     bool started_round;
     
-    /**
-     *These two variables are the length of the actual words "WORD:" AND "RESTRICTED:" used to parse the Card string recieved from server
-     **/
-    int word_length;
-    int restricted_length;
-    
 public:
     void setup();
     void update();
