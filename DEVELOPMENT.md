@@ -23,7 +23,7 @@
     * There appears to be a lag sending things to the client, so the restricted words don't match the actual words
     * Timer uses getElapsedTime but it does not create an accurate timer
     
-    **Week 3**
+**Week 3**
 * Fixed Issues from Week 2
     * To fix the lag, I sent the actual word and the restricted words as one long string instead of sending the actual word and each restricted word seperately
     * I used ofResetElapsedTimeCounter() to reset the time at the begenning of each round
