@@ -5,8 +5,6 @@ int current_card = 0;
 std::vector<Player> players;
 int current_player = 0;
 
-
-//--------------------------------------------------------------
 void ofApp::setup(){
     // Set up network
     ofxTCPSettings settings(647563);
@@ -17,7 +15,7 @@ void ofApp::setup(){
     cards = createCards("/Users/tejukandula/Documents/TabooServer/TabooCards.txt");
     std::random_shuffle(cards.begin(), cards.end());
 }
-//--------------------------------------------------------------
+
 void ofApp::update() {
     // Adds players to players vector once connected
     for (int i = 0; i <TCP.getLastID(); i++) {
@@ -64,67 +62,7 @@ void ofApp::update() {
     checkGuesses();
 }
 
-
-//--------------------------------------------------------------
-void ofApp::draw() {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){
-    
-}
-
+//---------------HELPER METHODS--------------------
 vector<Card> ofApp::createCards(string file_path) {
     vector<Card> cards;
     std::ifstream fin(file_path);

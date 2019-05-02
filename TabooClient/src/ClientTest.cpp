@@ -1,3 +1,4 @@
+/**
 #define CATCH_CONFIG_MAIN
 #include "/Users/tejukandula/Documents/STLIntro/catch.hpp"
 #include "CardParser.h"
@@ -46,5 +47,5 @@ TEST_CASE("Only one restricted word") {
         REQUIRE(restricted == test_restricted);
     }
 }
-
+**/
 

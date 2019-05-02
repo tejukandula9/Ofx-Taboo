@@ -1,9 +1,10 @@
+/**
 #include "CardParser.h"
 
 std::string current_word;
 std::vector<std::string> restricted;
 
-// Copy this method just to test without open frameworks since we can test helper methods withing ofApp.cpp
+// Copy this method just to test without open frameworks since we can't test helper methods withing ofApp.cpp
 void parseCard(std::string Card) {
     restricted.clear();
     int word_length = 5;
@@ -27,3 +28,4 @@ void parseCard(std::string Card) {
         found = Card.find(look_for, 1);
     }
 }
+**/

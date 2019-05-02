@@ -651,13 +651,13 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				337F4DEC227A4BF3009420F5 /* catch.hpp */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
 				7CC6D1116729BDB808166DA0 /* ClientTest.cpp */,
 				E919387143CEB1CC6C013820 /* CardParser.h */,
 				3CDB41BE4B835B6E502CA32A /* CardParser.cpp */,
+				337F4DEC227A4BF3009420F5 /* catch.hpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
